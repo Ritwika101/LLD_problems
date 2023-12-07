@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <sstream>
 using namespace std;
-#define ll long long
+
 class Rates;
 class TypeMatch;
 class Address;
@@ -651,14 +651,11 @@ class Admin : public Person {
 
 };
 
-
-
 ParkingLot* ParkingLot :: parkingLot = nullptr;
 Rates* Rates::rates = nullptr;
 TypeMatch* TypeMatch::typeMatchMap = nullptr;
 
 int main() {
-    cout<<"************************************************************************"<<endl;
     Address* add1 = new Address("bangalore", "karnataka");
     Address* add2 = new Address("kolkata", "west bengal");
     Address* add3 = new Address("hyderabad", "telengana");
@@ -721,7 +718,7 @@ int main() {
     Person* Sagnik = new Person();
     Sagnik->addPerson("Sagnik", 5, add2);
     Person* Swatantra = new Person();
-    //Swatantra->addPerson("Swatantra", 6, add2);
+    Swatantra->addPerson("Swatantra", 6, add2);
 
     //Sagnik's Bike and Car
     Vehicle* bike1 = new Vehicle("WB009321", 0, BIKE, Sagnik);
