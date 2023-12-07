@@ -705,10 +705,10 @@ int main() {
         board->display();
     }
 
-    Entry* entry1 = parkingLot->addEntry(0);
-    Entry* entry2 = parkingLot->addEntry(1);
-    Exit* exit1 = parkingLot->addExit(2);
-    Exit* exit2 = parkingLot->addExit(3);
+    Entry* entry1 = Ritwika->addEntryGate(parkingLot, 0);
+    Entry* entry2 = Ritwika->addEntryGate(parkingLot, 1);
+    Exit* exit1 = Ritwika->addExitGate(parkingLot, 2);
+    Exit* exit2 = Ritwika->addExitGate(parkingLot, 3);
 
     ParkingAttendant* Rina = new ParkingAttendant();
     Rina->addPerson("Rina", 1, add2); //entry
@@ -739,7 +739,7 @@ int main() {
     Vehicle* car4 = new Vehicle("WB654473", 4, CAR, Sagnik);
     Vehicle* car5 = new Vehicle("WB654474", 5, CAR, Sagnik);
 
-    //Swatantra's Bike, Car
+    //Swatantra's Car and Truck
     Vehicle* truck1 = new Vehicle("WB009300", 6, TRUCK, Swatantra);
     Vehicle* truck2 = new Vehicle("WB009301", 7, TRUCK, Swatantra);
     Vehicle* truck3 = new Vehicle("WB989800", 8, TRUCK, Swatantra);
