@@ -416,7 +416,6 @@ class Payment {
     public:
         virtual void processPayment(ParkingTicket* ticket, PaymentType paymentType) = 0;
 };
-
 class Credit : public Payment {
     public:
         //do payment by credit card
@@ -432,6 +431,15 @@ class Cash : public Payment {
         void processPayment(ParkingTicket* ticket, PaymentType paymentType) {
             int amount  = ticket->calculate();
             cout<<"Payment done by cash for an amount : "<<amount<<endl;
+        }
+};
+
+class PaymentFactory {
+    public:
+        static Payment* paymentMethod(PaymentType paymentType) {
+            if(paymentType == CASH) {
+                return new Cash();
+            } else return new Credit();
         }
 };
 
@@ -570,8 +578,7 @@ class ParkingAttendant : public Person {
             this->exit = gate;
         }
         void exitVehicle(Vehicle* vehicle, ParkingTicket* ticket, PaymentType paymentType) {
-            if(paymentType == CASH) paymentService = new Cash();
-            else paymentService = new Credit();
+            paymentService = PaymentFactory :: paymentMethod(paymentType);
             if(ticket->getStatus() == PAID) cout<<"Cannot take payment from a vehicle that has already cleared payment"<<endl;
             paymentService->processPayment(ticket, paymentType);
             //update ticket status
