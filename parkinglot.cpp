@@ -41,51 +41,55 @@ enum TicketStatus {
 enum PaymentType {
     CASH, CREDIT
 };
-string getCurrentTime() {
-    auto currentTimePoint = chrono::system_clock::now();
-    time_t currentTime = chrono::system_clock::to_time_t(currentTimePoint);
-    string timeStr;
-    {
-        stringstream ss;
-        ss << put_time(localtime(&currentTime), "%Y-%m-%d %H:%M:%S");
-        timeStr = ss.str();
+
+class TimeUtil {
+    public:
+    static string getCurrentTime() {
+        auto currentTimePoint = chrono::system_clock::now();
+        time_t currentTime = chrono::system_clock::to_time_t(currentTimePoint);
+        string timeStr;
+        {
+            stringstream ss;
+            ss << put_time(localtime(&currentTime), "%Y-%m-%d %H:%M:%S");
+            timeStr = ss.str();
+        }
+        return timeStr;
     }
-    return timeStr;
-}
 
-int getHourDifference(const string& timeStr1, const string& timeStr2) {
-    tm tm1 = {};
-    tm tm2 = {};
-    stringstream ss1(timeStr1);
-    stringstream ss2(timeStr2);
-    ss1 >> get_time(&tm1, "%Y-%m-%d %H:%M:%S");
-    ss2 >> get_time(&tm2, "%Y-%m-%d %H:%M:%S");
-    time_t time1 = mktime(&tm1);
-    time_t time2 = mktime(&tm2);
-    int secondsDifference = abs(int(difftime(time1, time2)));
-    int hoursDifference = secondsDifference / 3600;
-    return hoursDifference;
-}
+    static int getHourDifference(const string& timeStr1, const string& timeStr2) {
+        tm tm1 = {};
+        tm tm2 = {};
+        stringstream ss1(timeStr1);
+        stringstream ss2(timeStr2);
+        ss1 >> get_time(&tm1, "%Y-%m-%d %H:%M:%S");
+        ss2 >> get_time(&tm2, "%Y-%m-%d %H:%M:%S");
+        time_t time1 = mktime(&tm1);
+        time_t time2 = mktime(&tm2);
+        int secondsDifference = abs(int(difftime(time1, time2)));
+        int hoursDifference = secondsDifference / 3600;
+        return hoursDifference;
+    }
 
-std::string addFiveHours(const std::string& timeStr) {
+    static std::string addFiveHours(const std::string& timeStr) {
     // Convert time string to tm structure
-    struct tm tmStruct = {};
-    std::istringstream ss(timeStr);
-    ss >> std::get_time(&tmStruct, "%Y-%m-%d %H:%M:%S");
+        struct tm tmStruct = {};
+        std::istringstream ss(timeStr);
+        ss >> std::get_time(&tmStruct, "%Y-%m-%d %H:%M:%S");
+        
+        if (ss.fail()) {
+            std::cerr << "Failed to parse the input time string: " << timeStr << std::endl;
+            return "";  // Handle the error appropriately
+        }
     
-    if (ss.fail()) {
-        std::cerr << "Failed to parse the input time string: " << timeStr << std::endl;
-        return "";  // Handle the error appropriately
+        time_t oldTime = std::mktime(&tmStruct);
+        time_t newTime = oldTime + 5 * 3600;
+        struct tm* newTm = std::localtime(&newTime);
+        
+        std::ostringstream newTimeStr;
+        newTimeStr << std::put_time(newTm, "%Y-%m-%d %H:%M:%S");
+        return newTimeStr.str();
     }
-
-    time_t oldTime = std::mktime(&tmStruct);
-    time_t newTime = oldTime + 5 * 3600;
-    struct tm* newTm = std::localtime(&newTime);
-    
-    std::ostringstream newTimeStr;
-    newTimeStr << std::put_time(newTm, "%Y-%m-%d %H:%M:%S");
-    return newTimeStr.str();
-}
+};
 
 class Rates {
     unordered_map<int, int> rateMap;
@@ -194,9 +198,9 @@ class ParkingTicket { //vehicle
         int hourlyRate = Rates :: getMap()[spottype];
         cout<<"Spot type : "<<spottype<<" for which hourly rate is : "<<hourlyRate<<endl;
         // this->endtime = getCurrentTime(); // this should be done
-        this->endtime = addFiveHours(this->starttime);
+        this->endtime = TimeUtil :: addFiveHours(this->starttime);
         cout<<"Initiating calculation of amount"<<endl;
-        int hours = getHourDifference(this->endtime, this->starttime);
+        int hours = TimeUtil :: getHourDifference(this->endtime, this->starttime);
         cout<<"Hour difference = "<<hours<<endl;
         int amount = hourlyRate * hours;
         this->amount = amount;
@@ -456,7 +460,7 @@ class Entry {
         }
         ParkingTicket* addTicket(string ticketId, int floorId, int spotId, string vehicleNo, ParkingSpotType spottype) {
             ParkingTicket* ticket = new ParkingTicket();
-            ticket->createTicket(ticketId, floorId, spotId, vehicleNo, getCurrentTime(), spottype);
+            ticket->createTicket(ticketId, floorId, spotId, vehicleNo, TimeUtil :: getCurrentTime(), spottype);
             ticket->display();
             return ticket;
         }
