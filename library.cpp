@@ -28,52 +28,51 @@ public:
     string address;
     int age;
     int id;
-    Library* lib;
-    Person(string name, string address, int age, int id, Library* lib) {
+    //Library* lib;
+    Person(string name, string address, int age, int id) {
         this->name = name;
         this->address = address;
         this->age = age;
         this->id = id;
-        this->lib = lib;
     }
 
-    int searchABook(int bookid);
+    int searchABook(int bookid, Library* lib);
 };
 
 class User : public Person {
 public:
     string type;
     vector<int> issuedBooks;
-    User(string name, string address, int age, int id, Library* lib) : Person(name, address, age, id, lib) {
+    User(string name, string address, int age, int id) : Person(name, address, age, id) {
         this->type = "user";
     }
-    void addBookToUser(int id, int bookid);
+    void addBookToUser(int id, int bookid, Library* lib);
 
-    void takeABook(int bookid);
+    void takeABook(int bookid, Library* lib);
 
     int findIssuedBooks();
     
-    void removeBookFromUser(int id, int bookid);
+    void removeBookFromUser(int id, int bookid, Library* lib);
 
-    void dropABook(int bookid);
+    void dropABook(int bookid, Library* lib);
 
 };
 
 class Administrator : public Person {
 public:
     string type;
-    Administrator(string name, string address, int age, int id, Library* lib) : Person(name, address, age, id, lib) {
+    Administrator(string name, string address, int age, int id) : Person(name, address, age, id) {
         this->type = "admin";
     }
-    Book* addABook(string name, string author, int pages, int copies, int bookid);
+    Book* addABook(string name, string author, int pages, int copies, int bookid, Library* lib);
 
-    void addUser(User* user);
+    void addUser(User* user, Library* lib);
 
-    void issueToUser(int id, int bookid);
+    void issueToUser(int id, int bookid, Library* lib);
 
-    int findIssuedBooksOfUser(int id);
+    int findIssuedBooksOfUser(int id, Library* lib);
 
-    void displayBooks();
+    void displayBooks(Library* lib);
 };
 
 class Library {
@@ -99,7 +98,7 @@ void Book::display() {
     cout<<"Book details:"<<endl;
     cout<<this->bookid<<" "<<this->name<<" "<<this->author<<" "<<this->copies<<endl;
 }
-int Person::searchABook(int bookid) {
+int Person::searchABook(int bookid, Library* lib) {
     vector<Book*> b = lib->books;
     for(int i=0; i<b.size(); i++) {
         if(b[i]->bookid == bookid) return i;
@@ -107,7 +106,7 @@ int Person::searchABook(int bookid) {
     return -1;
 }
 
-void User::addBookToUser(int id, int bookid) {
+void User::addBookToUser(int id, int bookid, Library* lib) {
     for(int i=0; i<lib->users.size(); i++) {
         if(lib->users[i]->id == id) {
             lib->users[i]->issuedBooks.push_back(bookid);
@@ -116,7 +115,7 @@ void User::addBookToUser(int id, int bookid) {
     }
 }
 
-void User::removeBookFromUser(int id, int bookid) {
+void User::removeBookFromUser(int id, int bookid, Library* lib) {
     bool removed = false;
     for(int i=0; i<lib->users.size(); i++) {
         if(lib->users[i]->id == id) {
@@ -131,14 +130,14 @@ void User::removeBookFromUser(int id, int bookid) {
     }      
 }
 
-void User::takeABook(int bookid) {
-    int i = searchABook(bookid);
+void User::takeABook(int bookid, Library* lib) {
+    int i = searchABook(bookid, lib);
     if(i != -1) {
         if(lib->books[i]->copies > 0) {
-            addBookToUser(this->id, bookid);
+            addBookToUser(id, bookid, lib);
             lib->books[i]->copies -= 1;
             cout<<"Reduced copies to: "<<lib->books[i]->copies<<endl;
-            cout<<"Assigned bookid: "<<bookid<<" to user: "<<this->id<<endl;
+            cout<<"Assigned bookid: "<<bookid<<" to user: "<<id<<endl;
         } else {
             cout<<"Book has no copies left"<<endl;
         }
@@ -147,42 +146,42 @@ void User::takeABook(int bookid) {
     }
 }
 
-void User::dropABook(int bookid) {
-    int i = searchABook(bookid);
+void User::dropABook(int bookid, Library* lib) {
+    int i = searchABook(bookid, lib);
     if(i != -1) {
         lib->books[i]->copies += 1;
-        removeBookFromUser(this->id, bookid);
-        cout<<"Dropped bookid: "<<bookid<<" by user: "<<this->id<<endl;
+        removeBookFromUser(id, bookid, lib);
+        cout<<"Dropped bookid: "<<bookid<<" by user: "<<id<<endl;
     } else {
         cout<<"No such book exists"<<endl;
     }
 }
 
 int User::findIssuedBooks() {
-    cout<<"Issued books for user: "<<this->id<<" is "<<this->issuedBooks.size()<<endl;
-    return this->issuedBooks.size();
+    cout<<"Issued books for user: "<<id<<" is "<<issuedBooks.size()<<endl;
+    return issuedBooks.size();
 }
 
 
-Book* Administrator::addABook(string name, string author, int pages, int copies, int bookid) {
+Book* Administrator::addABook(string name, string author, int pages, int copies, int bookid, Library* lib) {
     Book* b = new Book(name, author, pages, copies, bookid);
     lib->books.push_back(b);
     cout<<"Added a book: bookId"<<bookid<<endl;
     return b;
 }
 
-void Administrator::addUser(User* user) {
+void Administrator::addUser(User* user, Library* lib) {
     lib->users.push_back(user);
 }
 
-void Administrator::issueToUser(int id, int bookid) {
-    int i = searchABook(bookid);
+void Administrator::issueToUser(int id, int bookid, Library* lib) {
+    int i = searchABook(bookid, lib);
     bool issued = false;
     if(i != -1) {
         if(lib->books[i]->copies > 0) {
             for(int j=0; j<lib->users.size(); j++) {
                 if(lib->users[j]->id == id) {
-                    lib->users[j]->addBookToUser(id, bookid);
+                    lib->users[j]->addBookToUser(id, bookid, lib);
                     lib->books[i]->copies -= 1;
                     cout<<"Reduced copies to: "<<lib->books[i]->copies<<endl;
                     issued = true;
@@ -200,7 +199,7 @@ void Administrator::issueToUser(int id, int bookid) {
         
 }
 
-int Administrator :: findIssuedBooksOfUser(int id) {
+int Administrator :: findIssuedBooksOfUser(int id, Library* lib) {
     if(id >= 0 && id < lib->users.size()) {
         int books = lib->users[id]->issuedBooks.size();
         cout<<"Issued books of user: "<<id<<"is "<<books;
@@ -208,7 +207,7 @@ int Administrator :: findIssuedBooksOfUser(int id) {
     } else return 0;
 }
 
-void Administrator::displayBooks() {
+void Administrator::displayBooks(Library* lib) {
     for(int i=0; i<lib->books.size(); i++) {
         Book* b = lib->books[i];
         b->display();
@@ -217,18 +216,18 @@ void Administrator::displayBooks() {
 
 int main() {
     Library* lib = Library::getLibrary();
-    Administrator* admin = new Administrator("A", "add1", 23, 1, lib);
-    User* user1 = new User("B", "add2", 23, 2, lib);
-    User* user2 = new User("C", "add3", 23, 3, lib);
-    admin->addUser(user1);
-    admin->addUser(user2);
-    admin->addABook("Jane Eyre", "Charlotte Bronte", 100, 5, 0);
-    admin->addABook("Little Women", "Louisa May alcott", 100, 10, 1);
-    admin->issueToUser(2, 1);
-    user1->takeABook(1);
-    admin->issueToUser(3, 0);
+    Administrator* admin = new Administrator("A", "add1", 23, 1);
+    User* user1 = new User("B", "add2", 23, 2);
+    User* user2 = new User("C", "add3", 23, 3);
+    admin->addUser(user1, lib);
+    admin->addUser(user2, lib);
+    admin->addABook("Jane Eyre", "Charlotte Bronte", 100, 5, 0, lib);
+    admin->addABook("Little Women", "Louisa May alcott", 100, 10, 1, lib);
+    admin->issueToUser(2, 1, lib);
+    user1->takeABook(1, lib);
+    admin->issueToUser(3, 0, lib);
     user1->findIssuedBooks();
     user2->findIssuedBooks();
-    admin->displayBooks();
+    admin->displayBooks(lib);
     // Rest of the main function
 }
